@@ -15,8 +15,8 @@ $MySQLPasswd 	= ""; 			//password Mysql
 $MySQLDb 		= "tes"; 		//Database yang di gunakan
 $MyPort			= null;
 $sql 			= new db;
-$sql -> db_SetErrorReporting(FALSE);
 $konek = $sql -> db_Connect($MySQLHost, $MySQLUser, $MySQLPasswd, $MySQLDb, $MyPort);
+$sql -> db_SetErrorReporting(TRUE);
 
 if ($konek == "wadoh_ga_bisa_konek"){ 
 	die("GAK BISA CONNECT CUY!!"); 
@@ -90,7 +90,7 @@ class db{
 		}
 	}
 /**
-
+INSERT
 */
 	/*
 	Batasan masalah
@@ -126,7 +126,7 @@ class db{
 
 	*/
 
-	function db_Insert($table, $arg){
+	function db_Insert($table, $arg, $debug = false){
 
 		if (is_array($arg)) {
 
@@ -145,13 +145,28 @@ class db{
 			$sql = "INSERT INTO ".$table." VALUES (".$arg.")";
 
 		}
+
+		if ($debug == true) {
+			echo $sql;
+		} else {
+			if($result = $this->mySQLresult = @mysql_query( $sql )){
+				$tmp = mysql_insert_id();
+				return $tmp;
+			}else{
+				$this->dbError("db_Insert");
+				return FALSE;
+			}
+		}
 		
-		if($result = $this->mySQLresult = @mysql_query( $sql )){
-			$tmp = mysql_insert_id();
-			return $tmp;
-		}else{
-			$this->dbError("db_Insert");
-			return FALSE;
+	}
+/**
+ERROR
+*/
+	function dbError($from){
+		if($error_message = @mysql_error()){
+			if($this->mySQLerror == TRUE){
+				echo $error_message . "<br>";
+			}
 		}
 	}
 /**
@@ -225,16 +240,6 @@ class db{
 		$rows = $this->mySQLrows = @mysql_num_rows($this->mySQLresult);
 		return $rows;
 		$this->dbError("db_Rows");
-	}
-/**
-
-*/
-	function dbError($from){
-		if($error_message = @mysql_error()){
-			if($this->mySQLerror == TRUE){
-				return $error_message;
-			}
-		}
 	}
 /**
 
